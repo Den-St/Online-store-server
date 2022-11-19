@@ -1,0 +1,328 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type CartEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  cartItems: [CartItemEntity!]
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type CartItemEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  product: ProductEntity!
+  number: Float!
+  cart: CartEntity
+}
+
+type ReceiptEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  buyer: UserEntity!
+  product: ProductEntity!
+  status: String!
+  amountToBuy: Float!
+}
+
+type RoleEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  value: String!
+}
+
+type UserEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  email: String!
+  phoneNumber: String!
+  name: String!
+  password: String!
+  roles: [RoleEntity!]
+  companies: [CompanyEntity!]!
+  cart: CartEntity!
+  receipts: [ReceiptEntity!]!
+  recentlyViewedProducts: [ProductEntity!]!
+  favoriteProducts: [ProductEntity!]!
+}
+
+type CompanyEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  creator: UserEntity!
+  image: ImageEntity!
+}
+
+type CharacteristicValueEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  value: String!
+}
+
+type CharacteristicEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  values: [CharacteristicValueEntity!]!
+  value: CharacteristicValueEntity!
+}
+
+type CategoryEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  parentId: Float
+  isMain: Boolean!
+  name: String!
+  value: String!
+  characteristics: [CharacteristicEntity!]!
+}
+
+type ProductEntity {
+  id: ID!
+  confirmed: Boolean!
+  category: CategoryEntity!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  price: Float!
+  discountPrice: Float!
+  isOnSale: Boolean!
+  amountInStorage: Float!
+  potentialAmountInStorage: Float!
+  rating: Float!
+  sumOfRates: Float!
+  numberOfRates: Float!
+  seller: CompanyEntity!
+  characteristics: [CharacteristicEntity!]!
+  textDescription: String
+  popularity: Float!
+  images: [ImageEntity!]
+  cartItems: [CartItemEntity!]!
+}
+
+type ImageEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  url: String!
+  isMain: Boolean!
+}
+
+type CartProductT {
+  product: ProductEntity!
+  number: Float!
+}
+
+type AuthGetMeType {
+  name: String!
+  id: Float!
+  email: String!
+  phoneNumber: String!
+  roles: [RoleEntity!]!
+}
+
+type AuthType {
+  token: String!
+  name: String!
+  id: Float!
+  email: String!
+  phoneNumber: String!
+  roles: [RoleEntity!]!
+}
+
+type tokenT {
+  token: String!
+}
+
+type Query {
+  getAllUsers: [UserEntity!]!
+  getUserById(getUserById: Float!): UserEntity!
+  getUsersRecentlyViewed(getUsersRecentlyViewed: Float!): [ProductEntity!]!
+  getUsersFavoriteProducts(getUsersFavoriteProducts: Float!): [ProductEntity!]!
+  getAllRoles: [RoleEntity!]!
+  getCartByUserId(getCartByUserId: Float!): [CartProductT!]!
+  getProductIdsInCartByUserId(getProductIdsInCartByUserId: Float!): [Float!]!
+  getUsersCompanies(getUsersCompanies: Float!): [CompanyEntity!]!
+  getMe(getMe: String!): AuthGetMeType!
+  getOneProduct(getOneDetailedProductById: Float!): ProductEntity!
+  getAllProducts: [ProductEntity!]!
+  getProductsByCategory(getProductsByCategory: Float!): [ProductEntity!]!
+  filterProducts(filterProducts: ProductFilterDto!): [ProductEntity!]!
+  getAllMainCategories: [CategoryEntity!]!
+  getAllNotMainCategories: [CategoryEntity!]!
+  getCategoryById(getCategoryById: Float!): CategoryEntity!
+  getChildCategories(getChildCategories: Float!): [CategoryEntity!]!
+  getCategoriesLine(getCategoriesLine: Float!): [CategoryEntity!]!
+  getAllReceipts: [ReceiptEntity!]!
+  getOneReceiptById(getOneReceiptById: Float!): ReceiptEntity!
+  getAllReceiptsByUserId(getAllReceiptsByUserId: Float!): [ReceiptEntity!]!
+}
+
+input ProductFilterDto {
+  categoryId: Float!
+  charValuesId: [String!]!
+}
+
+type Mutation {
+  createUser(createUser: UserCreateDto!): UserEntity!
+  giveAdminRole(giveAdminRole: Float!): UserEntity!
+  editUserInfo(editUserInfo: UserEditDto!): tokenT!
+  createRole(createRole: RoleCreateDto!): RoleEntity!
+  addProductToCart(addProductToCart: AddProductToCartDto!): CartEntity!
+  deleteProductFromCart(deleteProductFromCart: DeleteProductFromCartDto!): CartEntity!
+  changeProductNumber(changeProductNumber: ChangeProductNumberDto!): CartEntity!
+  createCompany(createCompany: CompanyCreateDto!): CompanyEntity!
+  createImage(createImage: ImageCreateDto!): ImageEntity!
+  register(register: UserCreateDto!): AuthType!
+  login(login: AuthLoginDto!): AuthType!
+  createProduct(createProduct: ProductCreateDto!): ProductEntity!
+  buyProduct(buyProduct: ProductBuyDto!): [ReceiptEntity!]!
+  confirmProduct(confirmProduct: Float!): ProductEntity!
+  addToViewedProducts(addToViewedProducts: AddToViewedProductsDto!): ProductEntity
+  addToFavoriteProducts(addToFavoriteProducts: AddToViewedProductsDto!): ProductEntity
+  deleteFromFavoriteProducts(deleteFromFavoriteProducts: AddToViewedProductsDto!): ProductEntity
+  createCategory(createCategory: CategoryCreateDto!): CategoryEntity!
+  addCharToCategory(addCharToCategory: CategoriesAddCharDto!): CategoryEntity!
+  createCharacteristic(createCharacteristic: CharacteristicCreateDto!): CharacteristicEntity!
+  addValueToChar(addValueToChar: CharacteristicAddValueDto!): CharacteristicEntity!
+  setValueToChar(setValueToChar: CharacteristicSetValueDto!): CharacteristicEntity!
+  createCharValue(createCharValue: CharacteristicValueCreateDto!): CharacteristicValueEntity!
+  createReceipt(createReceipt: ReceiptCreateDto!): ReceiptEntity!
+  confirmReceipt(confirmReceipt: Float!): ReceiptEntity!
+  declineReceipt(declineReceipt: Float!): ReceiptEntity!
+}
+
+input UserCreateDto {
+  email: String!
+  password: String!
+  name: String!
+  phoneNumber: String!
+}
+
+input UserEditDto {
+  id: Float!
+  name: String!
+  email: String!
+  phoneNumber: String!
+}
+
+input RoleCreateDto {
+  name: String!
+  value: String!
+}
+
+input AddProductToCartDto {
+  productId: Float!
+  userId: Float!
+}
+
+input DeleteProductFromCartDto {
+  productId: Float!
+  userId: Float!
+}
+
+input ChangeProductNumberDto {
+  userId: Float!
+  productId: Float!
+  number: Float!
+}
+
+input CompanyCreateDto {
+  name: String!
+  creatorId: Float!
+  image: Upload!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input ImageCreateDto {
+  url: String!
+  isMain: Boolean!
+}
+
+input AuthLoginDto {
+  email: String!
+  password: String!
+}
+
+input ProductCreateDto {
+  categoryId: Float!
+  name: String!
+  price: Float!
+  discountPrice: Float = 0
+  amountInStorage: Float = 0
+  sellerId: Float!
+  textDescription: String
+  valuesIds: [Float!]!
+  images: [Upload!]!
+}
+
+input ProductBuyDto {
+  buyerId: Float!
+  cartItems: [CartItemT!]!
+}
+
+input CartItemT {
+  productId: Float!
+  number: Float!
+}
+
+input AddToViewedProductsDto {
+  userId: Float!
+  productId: Float!
+}
+
+input CategoryCreateDto {
+  name: String!
+  value: String!
+  isMain: Boolean!
+  parentId: Float = null
+}
+
+input CategoriesAddCharDto {
+  categoryId: Float!
+  characteristicId: Float!
+}
+
+input CharacteristicCreateDto {
+  name: String!
+}
+
+input CharacteristicAddValueDto {
+  charId: Float!
+  valueId: Float!
+}
+
+input CharacteristicSetValueDto {
+  charId: Float!
+  valueId: Float!
+}
+
+input CharacteristicValueCreateDto {
+  name: String!
+  value: String!
+}
+
+input ReceiptCreateDto {
+  buyerId: Float!
+  productId: Float!
+  amountToBuy: Float!
+}
