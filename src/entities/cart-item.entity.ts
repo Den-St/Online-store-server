@@ -18,7 +18,7 @@ export class CartItemEntity {
     updatedAt: Date;
 
     @Field(() => ProductEntity)
-    @ManyToOne(() => ProductEntity,{nullable:true,eager:true})
+    @ManyToOne(() => ProductEntity,{ nullable:true})
     @JoinTable()
     product:ProductEntity;
 

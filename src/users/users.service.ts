@@ -1,3 +1,4 @@
+import { ReceiptEntity } from './../entities/receipt.entity';
 import { ProductEntity } from './../entities/product.entity';
 import { CartService } from './../cart/cart.service';
 import { tokenT } from './../auth/types/tokenT';
@@ -9,6 +10,7 @@ import {UserEntity} from "../entities/user.entity";
 import {Repository} from "typeorm";
 import {UserCreateDto} from "./dto/user-create.dto";
 import {RolesService} from "../roles/roles.service";
+import { CompanyEntity } from 'src/entities/company.entity';
 
 @Injectable()
 export class UsersService {
@@ -42,19 +44,38 @@ export class UsersService {
     }
 
     async getAll():Promise<UserEntity[]> {
-        return await this.userRepository.find({
-            relations:['roles'],
-        });
+        return await this.userRepository.find();
+    }
+
+    async getUsersReceipts(id:number):Promise<ReceiptEntity[]>{
+        const user = await this.userRepository.findOne({where:{id},relations:["receipts","receipts.product","receipts.product.images"]});
+        return user.receipts;
+    }
+    async getUserWithFavoriteProducts(id:number):Promise<UserEntity>{
+        const user = await this.userRepository.findOne({where:{id:id},relations:[
+            "favoriteProducts",
+            "favoriteProducts.images"
+        ]});
+        return user;
+    }
+    async getUserWithRecentlyViewed(id:number):Promise<UserEntity>{
+        const user = await this.userRepository.findOne({where:{id:id},relations:[
+            "recentlyViewedProducts",
+            "recentlyViewedProducts.images"
+        ]});
+        return user;
+    }
+    async getUserWithCart(id:number):Promise<UserEntity>{
+        const user = await this.userRepository.findOne({where:{id:id},relations:[
+            "cart",
+            "cart.cartItems",
+            "cart.cartItems.product",
+            "cart.cartItems.product.images"
+        ]});
+        return user;
     }
     async getUserById(id:number):Promise<UserEntity> | null{
         return await this.userRepository.findOne({
-            relations:[
-                "roles",
-                "cart",
-                "cart.cartItems",
-                "recentlyViewedProducts",
-                "favoriteProducts"
-            ],
             where: {
                 id: id
             },
@@ -73,17 +94,12 @@ export class UsersService {
     
     async editUserInfo(dto:UserEditDto):Promise<tokenT> {
         const user = await this.userRepository.findOne({
-            relations: {
-                roles: true,
-                companies:true,
-            },
             where: {
                 id: dto.id
             },
         });
 
         const newUser = await this.userRepository.save({...user,name:dto.name,email:dto.email,phoneNumber:dto.phoneNumber});
-
 
         return {
             token:this.authService.generateToken(newUser)
@@ -95,13 +111,23 @@ export class UsersService {
     };
 
     async getUsersRecentlyViewed(userId:number):Promise<ProductEntity[]> {
-        // return (await this.getUserById(userId)).recentlyViewedProducts;
-        return [];
+        const user = await this.userRepository.findOne({where:{id:userId},relations:[
+            "recentlyViewedProducts",
+            "recentlyViewedProducts.images"
+        ]})
+        return user.recentlyViewedProducts;
     }
 
     async getUsersFavoriteProducts(userId:number):Promise<ProductEntity[]> {
-        // const user = await this.userRepository.findOne({where:{id:userId}});
-        // return user.favoriteProducts;
-        return [];
+        const user = await this.userRepository.findOne({where:{id:userId},relations:[
+            "favoriteProducts",
+            "favoriteProducts.images"
+        ]});
+        return user.favoriteProducts;
+    }
+
+    async getUsersCompanies(userId:number):Promise<CompanyEntity[]> {
+        const user = await this.userRepository.findOne({where:{id:userId},relations:["companies","companies.image"]});
+        return user.companies;
     }
 }

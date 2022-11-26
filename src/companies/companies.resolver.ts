@@ -19,13 +19,7 @@ export class CompaniesResolver {
     return await this.companyService.create(dto);
   }
 
-  @UseGuards(AuthGuard)
-  @Query(() => [CompanyEntity])
-  async getUsersCompanies(
-    @Args('getUsersCompanies') id: number,
-  ): Promise<CompanyEntity[]> {
-    return this.companyService.getUsersCompanies(id);
-  }
+  
 
   
 }

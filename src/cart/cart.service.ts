@@ -26,9 +26,9 @@ export class CartService {
     }
 
     async addOneProduct(dto:AddProductToCartDto):Promise<CartEntity> {
-        const user = await this.userService.getUserById(dto.userId);
+        const user = await this.userService.getUserWithCart(dto.userId);
 
-        const product = await this.productRepository.findOne({where:{id:dto.productId}});
+        const product = await this.productRepository.findOne({where:{id:dto.productId},relations:["images"]});
 
         const newCartItem = await this.cartItemsService.createAndSave({product:product,number:1});
 
@@ -38,35 +38,36 @@ export class CartService {
     }
 
     async changeProductNumber(dto:ChangeProductNumberDto):Promise<CartEntity> {
-        const user = await this.userService.getUserById(dto.userId);
-        
+        const user = await this.userService.getUserWithCart(dto.userId);
+        console.log("fd",user.cart.cartItems[0].number);
         for(let i = 0;i < user.cart.cartItems.length;i++) {
             if(user.cart.cartItems[i].product.id == dto.productId) {
-                await this.cartItemsService.createAndSave({...user.cart.cartItems[i],number:dto.number});
+                console.log("..",await this.cartItemsService.changeNumber({cartItem:user.cart.cartItems[i],number:dto.number}));
                 break;
             }
         }
+        console.log("fd",user.cart.cartItems[0].number);
         
         return user.cart;
     }
 
     async getProductIdsByUserId(id:number):Promise<number[]> {
-        const cartItems = (await this.userService.getUserById(id)).cart.cartItems;
+        const cartItems = (await this.userService.getUserWithCart(id)).cart.cartItems;
         const productIds = [...cartItems.map(cartItem =>  cartItem.product.id)];
 
         return productIds;
     }
 
     async getCartByUserId(id:number):Promise<CartItemEntity[]> {
-        const user = (await this.userService.getUserById(id));
+        const user = (await this.userService.getUserWithCart(id));
         const cartItems = user.cart.cartItems;
         return cartItems;
     }
 
     async deleteProduct(dto:DeleteProductFromCartDto):Promise<CartEntity> {
-        const user = await this.userService.getUserById(dto.userId);
+        const user = await this.userService.getUserWithCart(dto.userId);
 
-        const product = await this.productRepository.findOne({where:{id:dto.productId}});
+        const product = await this.productRepository.findOne({where:{id:dto.productId},relations:["images"]});
 
         await this.cartItemsService.deleteByProduct(product);
         
@@ -74,7 +75,7 @@ export class CartService {
     }
 
     async clearCart(userId:number) {
-        const user = await this.userService.getUserById(userId);
+        const user = await this.userService.getUserWithCart(userId);
         for(let i = 0;i < user.cart.cartItems.length;i++) {
             await this.cartItemsService.deleteById(user.cart.cartItems[i].id);
         }

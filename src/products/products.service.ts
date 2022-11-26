@@ -1,3 +1,6 @@
+import { ChangeRatingDto } from './dto/change-rating.dto';
+import { ReviewEntity } from './../entities/review.entity';
+import { SearchProductsDto } from './dto/search-products.dto';
 import { CartService } from 'src/cart/cart.service';
 import { ReceiptEntity } from './../entities/receipt.entity';
 import { ImageEntity } from 'src/entities/image.entity';
@@ -25,6 +28,10 @@ import { createWriteStream } from 'fs';
 import { AddToViewedProductsDto } from './dto/add-to-viewed-products.dto';
 import { UsersService } from 'src/users/users.service';
 import { ProductFilterDto } from './dto/product-filter.dto';
+import { GetAllDto } from './dto/get-all.dto';
+import { GetProductsT } from './types/get-products.type';
+import { In, Like} from "typeorm";
+import { skip } from 'rxjs';
 
 @Injectable()
 export class ProductsService {
@@ -83,16 +90,23 @@ export class ProductsService {
     });
   }
 
-  async getAll(): Promise<ProductEntity[]> {
-    return await this.productRepository.find({
+  async getAll(dto:GetAllDto): Promise<GetProductsT> {
+    const skip = (dto.page - 1) * 10;
+    const take = 10;
+    console.log(dto.page)
+    const products = await this.productRepository.findAndCount({
       relations: [
-        'characteristics',
-        'characteristics.value',
-        'characteristics.values',
-        'category',
         'images'
       ],
+      order:{id:"ASC"},
+      skip:skip,
+      take:take
     });
+    
+    return {
+       products:products[0],
+       total:products[1]
+    }
   }
 
   async getOne(id: number): Promise<ProductEntity> {
@@ -103,7 +117,9 @@ export class ProductsService {
         'characteristics.value',
         'characteristics.values',
         'category',
-        'images'
+        'images',
+        'seller',
+        'seller.image'
       ],
     });
   }
@@ -199,72 +215,127 @@ export class ProductsService {
   };
 
   async addToViewedProducts(dto:AddToViewedProductsDto):Promise<ProductEntity> {
-    // const user = await this.userService.getUserById(dto.userId);
-    // if(user.recentlyViewedProducts.findIndex(prod => prod.id === dto.productId) !== -1){
-    //   return;
-    // }
+    const user = await this.userService.getUserWithRecentlyViewed(dto.userId);
+    if(user.recentlyViewedProducts.findIndex(prod => prod.id === dto.productId) !== -1){
+      return;
+    }
 
-    // const product = await this.productRepository.findOne({where:{id:dto.productId}});
+    const product = await this.productRepository.findOne({where:{id:dto.productId}});
 
-    // if(user.recentlyViewedProducts.length < 10){
-    //   await this.userService.saveUser({...user,recentlyViewedProducts:[product,...user.recentlyViewedProducts]});
+    if(user.recentlyViewedProducts.length < 10){
+      await this.userService.saveUser({...user,recentlyViewedProducts:[product,...user.recentlyViewedProducts]});
       
-    //   return product;
-    // }
+      return product;
+    }
 
-    // await this.userService.saveUser({...user,recentlyViewedProducts:[product,...user.recentlyViewedProducts.slice(0,9)]});
+    await this.userService.saveUser({...user,recentlyViewedProducts:[product,...user.recentlyViewedProducts.slice(0,9)]});
 
-    // return product;
-
-    return null
+    return product;
   }
 
   async addToFavoriteProducts(dto:AddToViewedProductsDto):Promise<ProductEntity> {
-    // const user = await this.userService.getUserById(dto.userId);
-    // if(user.favoriteProducts.findIndex(prod => prod.id === dto.productId) !== -1){
-    //   return;
-    // }
+    const user = await this.userService.getUserWithFavoriteProducts(dto.userId);
+    if(user.favoriteProducts.findIndex(prod => prod.id === dto.productId) !== -1){
+      return;
+    }
 
-    // const product = await this.productRepository.findOne({where:{id:dto.productId}});
-    // await this.userService.saveUser({...user,favoriteProducts:[product,...user.favoriteProducts]});
+    const product = await this.productRepository.findOne({where:{id:dto.productId}});
+    await this.userService.saveUser({...user,favoriteProducts:[product,...user.favoriteProducts]});
     
-    // return product;
-    return null
+    return product;
   }
 
   async deleteFromFavoriteProducts(dto:AddToViewedProductsDto):Promise<ProductEntity> {
-    // const user = await this.userService.getUserById(dto.userId);
-    // if(user.favoriteProducts.findIndex(prod => prod.id === dto.productId) === -1){
-    //   return;
-    // }
+    const user = await this.userService.getUserWithFavoriteProducts(dto.userId);
+    if(user.favoriteProducts.findIndex(prod => prod.id === dto.productId) === -1){
+      return;
+    }
 
-    // const product = await this.productRepository.findOne({where:{id:dto.productId}});
-    // await this.userService.saveUser({...user,favoriteProducts:[...user.favoriteProducts.filter(prod => prod.id !== dto.productId)]});
+    const product = await this.productRepository.findOne({where:{id:dto.productId}});
+    await this.userService.saveUser({...user,favoriteProducts:[...user.favoriteProducts.filter(prod => prod.id !== dto.productId)]});
     
-    // return product;
-    return null
+    return product;
   }
 
 
-  async filterProducts(dto:ProductFilterDto):Promise<ProductEntity[]> {
-    const productsByCategory = await this.productRepository.find({
+  async filterProducts(dto:ProductFilterDto):Promise<GetProductsT> {
+    const skip = (dto.page - 1) * 10;
+    const take = 10;
+
+    if(!dto.charValuesId.length) {
+      const [productsByCategory,total] = await this.productRepository.findAndCount({
+        where: { 'category':{
+          'id':dto.categoryId
+        }},
+        relations: [
+          'characteristics',
+          'characteristics.value',
+          'images'
+        ],
+        order:{[dto.orderRule.fieldName]:dto.orderRule.orderValue},
+        skip:skip,
+        take:take
+      });
+      return {
+        products:productsByCategory,
+        total:total
+      }
+    }
+
+
+    const [filteredProducts,total] = await this.productRepository.findAndCount({
       where: { 'category':{
         'id':dto.categoryId
+      },'characteristics':{
+        'value':{
+          "value":In(dto.charValuesId)
+          }
       } },
       relations: [
         'characteristics',
         'characteristics.value',
-        'characteristics.values',
-        'category',
         'images'
       ],
+      order:{[dto.orderRule.fieldName]:dto.orderRule.orderValue},
+      skip:skip,
+      take:take
     });
 
-    if(!dto.charValuesId.length) {
-      return productsByCategory;
-    }
+    return {
+        products: filteredProducts,
+        total:total
+      }
+  }
 
-    return productsByCategory.filter(product =>
-       !!product.characteristics.filter(char => dto.charValuesId.includes(char.value.value)).length);
+  async searchProducts(dto:SearchProductsDto):Promise<GetProductsT> {
+    if(!dto.productName) return {
+      products:[],
+      total:0
+    }
+    const skip = (dto.page - 1) * 10;
+    const take = 10;
+    const [products,total] =  await this.productRepository.findAndCount({
+      where:{
+        name:Like(`%${dto.productName}%`)
+      },
+      skip:skip,take:take,
+      relations:["images"],
+      order:{[dto.orderRule.fieldName]:dto.orderRule.orderValue},
+    });
+
+    return {
+      products:products,
+      total:total
+    }
+  }
+
+  async changeProductRating(dto:ChangeRatingDto):Promise<ProductEntity> {
+    const product = await this.productRepository.findOne({where:{id:dto.productId}});
+    const newNumberOfRates = product.numberOfRates + 1;
+    const newSumOfRates = product.sumOfRates + dto.rate;
+    const newRating = Number((newSumOfRates/newNumberOfRates).toFixed(0));
+    
+    return await this.productRepository.save({...product,sumOfRates:newSumOfRates,
+      numberOfRates:newNumberOfRates,rating:newRating});
   }
 }

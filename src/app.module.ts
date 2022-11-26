@@ -16,6 +16,8 @@ import { AppResolver } from './app.resolver';
 import { ImageModule } from './image/image.module';
 import { CartModule } from './cart/cart.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { CartItemsModule } from './cart-items/cart-items.module';
       ReceiptModule,
       ImageModule,
       CartItemsModule,
+      ReviewsModule,
+      CommentsModule,
   ],
   controllers: [],
   providers: [AppResolver],

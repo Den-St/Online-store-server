@@ -4,12 +4,10 @@ import {
     CreateDateColumn,
     Entity,
     JoinTable,
-    ManyToMany,
     ManyToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
-import {CategoryEntity} from "./category.entity";
 import {UserEntity} from "./user.entity";
 import {ProductEntity} from "./product.entity";
 
@@ -32,7 +30,7 @@ export class ReceiptEntity{
     @Field(() => UserEntity)
     buyer:UserEntity;
 
-    @ManyToOne(() => ProductEntity,{eager:true})
+    @ManyToOne(() => ProductEntity)
     @JoinTable()
     @Field(() => ProductEntity)
     product:ProductEntity;

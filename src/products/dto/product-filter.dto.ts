@@ -1,5 +1,13 @@
 import { Field ,InputType} from "@nestjs/graphql";
 
+@InputType()
+export class OrderRuleT {
+    @Field()
+    fieldName:'popularity' | 'price'
+
+    @Field()
+    orderValue:'DESC' | 'ASC'
+}
 
 @InputType()
 export class ProductFilterDto {
@@ -8,4 +16,10 @@ export class ProductFilterDto {
 
     @Field(() => [String])
     charValuesId:string[];
+
+    @Field()
+    page:number;
+
+    @Field(() => OrderRuleT)
+    orderRule:OrderRuleT;
 }

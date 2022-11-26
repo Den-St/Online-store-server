@@ -2,11 +2,14 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type CartEntity {
+type ReceiptEntity {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  cartItems: [CartItemEntity!]
+  buyer: UserEntity!
+  product: ProductEntity!
+  status: String!
+  amountToBuy: Float!
 }
 
 """
@@ -23,14 +26,11 @@ type CartItemEntity {
   cart: CartEntity
 }
 
-type ReceiptEntity {
+type CartEntity {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  buyer: UserEntity!
-  product: ProductEntity!
-  status: String!
-  amountToBuy: Float!
+  cartItems: [CartItemEntity!]
 }
 
 type RoleEntity {
@@ -39,6 +39,15 @@ type RoleEntity {
   updatedAt: DateTime!
   name: String!
   value: String!
+}
+
+type CompanyEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  creator: UserEntity!
+  image: ImageEntity!
 }
 
 type UserEntity {
@@ -55,15 +64,30 @@ type UserEntity {
   receipts: [ReceiptEntity!]!
   recentlyViewedProducts: [ProductEntity!]!
   favoriteProducts: [ProductEntity!]!
+  reviews: [ReviewEntity!]!
 }
 
-type CompanyEntity {
+type CommentEntity {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  name: String!
   creator: UserEntity!
-  image: ImageEntity!
+  text: String!
+  commentToReview: ReviewEntity!
+  responseToCommentCreatorName: String!
+}
+
+type ReviewEntity {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  creator: UserEntity!
+  text: String!
+  product: ProductEntity!
+  consText: String!
+  prosText: String!
+  rate: Float!
+  comments: [CommentEntity!]!
 }
 
 type CharacteristicValueEntity {
@@ -115,6 +139,7 @@ type ProductEntity {
   popularity: Float!
   images: [ImageEntity!]
   cartItems: [CartItemEntity!]!
+  reviews: [ReviewEntity!]!
 }
 
 type ImageEntity {
@@ -151,20 +176,26 @@ type tokenT {
   token: String!
 }
 
+type GetProductsT {
+  products: [ProductEntity!]!
+  total: Float!
+}
+
 type Query {
   getAllUsers: [UserEntity!]!
   getUserById(getUserById: Float!): UserEntity!
   getUsersRecentlyViewed(getUsersRecentlyViewed: Float!): [ProductEntity!]!
   getUsersFavoriteProducts(getUsersFavoriteProducts: Float!): [ProductEntity!]!
+  getUsersCompanies(getUsersCompanies: Float!): [CompanyEntity!]!
   getAllRoles: [RoleEntity!]!
   getCartByUserId(getCartByUserId: Float!): [CartProductT!]!
   getProductIdsInCartByUserId(getProductIdsInCartByUserId: Float!): [Float!]!
-  getUsersCompanies(getUsersCompanies: Float!): [CompanyEntity!]!
   getMe(getMe: String!): AuthGetMeType!
   getOneProduct(getOneDetailedProductById: Float!): ProductEntity!
-  getAllProducts: [ProductEntity!]!
+  getAllProducts(getAllProducts: GetAllDto!): GetProductsT!
   getProductsByCategory(getProductsByCategory: Float!): [ProductEntity!]!
-  filterProducts(filterProducts: ProductFilterDto!): [ProductEntity!]!
+  filterProducts(filterProducts: ProductFilterDto!): GetProductsT!
+  searchProducts(searchProducts: SearchProductsDto!): GetProductsT!
   getAllMainCategories: [CategoryEntity!]!
   getAllNotMainCategories: [CategoryEntity!]!
   getCategoryById(getCategoryById: Float!): CategoryEntity!
@@ -173,11 +204,42 @@ type Query {
   getAllReceipts: [ReceiptEntity!]!
   getOneReceiptById(getOneReceiptById: Float!): ReceiptEntity!
   getAllReceiptsByUserId(getAllReceiptsByUserId: Float!): [ReceiptEntity!]!
+  getReviews(getReviews: GetReviewsDto!): [ReviewEntity!]!
+  getComments(getComments: GetCommentsDto!): [CommentEntity!]!
+}
+
+input GetAllDto {
+  page: Float!
 }
 
 input ProductFilterDto {
   categoryId: Float!
   charValuesId: [String!]!
+  page: Float!
+  orderRule: OrderRuleT!
+}
+
+input OrderRuleT {
+  fieldName: String!
+  orderValue: String!
+}
+
+input SearchProductsDto {
+  productName: String!
+  orderRule: OrderRuleT!
+  page: Float!
+}
+
+input GetReviewsDto {
+  productId: Float!
+  limit: Float!
+  skip: Float!
+}
+
+input GetCommentsDto {
+  reviewId: Float!
+  skip: Float!
+  limit: Float!
 }
 
 type Mutation {
@@ -186,7 +248,7 @@ type Mutation {
   editUserInfo(editUserInfo: UserEditDto!): tokenT!
   createRole(createRole: RoleCreateDto!): RoleEntity!
   addProductToCart(addProductToCart: AddProductToCartDto!): CartEntity!
-  deleteProductFromCart(deleteProductFromCart: DeleteProductFromCartDto!): CartEntity!
+  deleteProductFromCart(deleteProductFromCart: DeleteProductFromCartDto!): CartEntity
   changeProductNumber(changeProductNumber: ChangeProductNumberDto!): CartEntity!
   createCompany(createCompany: CompanyCreateDto!): CompanyEntity!
   createImage(createImage: ImageCreateDto!): ImageEntity!
@@ -207,6 +269,8 @@ type Mutation {
   createReceipt(createReceipt: ReceiptCreateDto!): ReceiptEntity!
   confirmReceipt(confirmReceipt: Float!): ReceiptEntity!
   declineReceipt(declineReceipt: Float!): ReceiptEntity!
+  createReview(createReview: CreateReviewDto!): ReviewEntity!
+  createComment(createComment: CreateCommentDto!): CommentEntity!
 }
 
 input UserCreateDto {
@@ -325,4 +389,20 @@ input ReceiptCreateDto {
   buyerId: Float!
   productId: Float!
   amountToBuy: Float!
+}
+
+input CreateReviewDto {
+  userId: Float!
+  text: String!
+  productId: Float!
+  rate: Float!
+  consText: String!
+  prosText: String!
+}
+
+input CreateCommentDto {
+  creatorId: Float!
+  text: String!
+  responseToCommentCreatorName: String = ""
+  reviewId: Float = 0
 }

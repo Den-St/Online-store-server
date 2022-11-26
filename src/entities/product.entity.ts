@@ -1,3 +1,4 @@
+import { ReviewEntity } from './review.entity';
 import { CartItemEntity } from './cart-item.entity';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import {
@@ -32,7 +33,7 @@ export class ProductEntity {
   confirmed: boolean;
 
   @Field(() => CategoryEntity)
-  @ManyToOne(() => CategoryEntity,{eager:true})
+  @ManyToOne(() => CategoryEntity)
   @JoinTable()
   category: CategoryEntity;
 
@@ -76,12 +77,12 @@ export class ProductEntity {
   numberOfRates: number;
 
   @Field(() => CompanyEntity)
-  @ManyToOne(() => CompanyEntity,{eager:true})
+  @ManyToOne(() => CompanyEntity)
   @JoinTable()
   seller: CompanyEntity;
 
   @Field(() => [CharacteristicEntity])
-  @ManyToMany(() => CharacteristicEntity, (characteristic) => characteristic,{eager:true})
+  @ManyToMany(() => CharacteristicEntity, (characteristic) => characteristic)
   @JoinTable()
   characteristics: CharacteristicEntity[];
 
@@ -94,10 +95,14 @@ export class ProductEntity {
   popularity: number;
 
   @Field(() => [ImageEntity],{nullable:true})
-  @OneToMany(() => ImageEntity,(images) => images.product,{eager:true})
+  @OneToMany(() => ImageEntity,(images) => images.product)
   images:ImageEntity[]
 
   @Field(() => [CartItemEntity])
   @OneToMany(() => CartItemEntity,cartItem => cartItem.product)
-  cartItems:CartItemEntity[]
+  cartItems:CartItemEntity[];
+
+  @Field(() => [ReviewEntity])
+  @OneToMany(() => ReviewEntity,review => review.product)
+  reviews:ReviewEntity[];
 }

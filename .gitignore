@@ -3,6 +3,7 @@
 pgdata
 /dist
 /node_modules
+/public
 
 # Logs
 logs

@@ -34,6 +34,7 @@ export class CharacteristicsService {
 
         return await this.characteristicRepository.save(newChar);
     }
+    
     async getById(id:number):Promise<CharacteristicEntity> {
         return await this.characteristicRepository.findOne({
             where: {id},
@@ -44,9 +45,9 @@ export class CharacteristicsService {
     async setValue(dto:CharacteristicSetValueDto):Promise<CharacteristicEntity> {
         const value = await this.charValueService.getById(dto.valueId);
         const prevCharacteristic = await this.characteristicRepository.findOne({
-            relations: {
-                values: true,
-            },
+            relations: [
+                "values"
+            ],
             where: {
                 id: dto.charId
             },

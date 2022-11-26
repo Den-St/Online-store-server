@@ -22,21 +22,19 @@ export class ReceiptService {
     async getOne(id:number):Promise<ReceiptEntity>{
         return await this.receiptRepository.findOne({
             where:{id},
-            relations:["buyer","product"]
+            relations:["buyer","product","product.images"]
         })
     }
 
     async getAll():Promise<ReceiptEntity[]> {
         return await this.receiptRepository.find({
-            relations:["buyer","product"]
+            relations:["buyer","product","product.images"]
         });
     }
 
     async getAllByUserId(id:number):Promise<ReceiptEntity[]> {
-        const buyer = await this.userService.getUserById(id);
-        console.log("ccc",buyer.receipts);
-
-        return buyer.receipts;
+        const receipts = await this.userService.getUsersReceipts(id);
+        return receipts;
     }
 
     async confirmReceipt(id:number):Promise<ReceiptEntity> {
@@ -55,7 +53,7 @@ export class ReceiptService {
     async declineReceipt(id:number):Promise<ReceiptEntity> {
         const receipt = await this.receiptRepository.findOne({
             where:{id:id},
-            relations:["buyer","product"]
+            relations:["buyer","product","product.images"]
         });
         if(receipt.status !== "Not confirmed") throw new HttpException("receipt status already "+receipt.status,HttpStatus.BAD_REQUEST);
 

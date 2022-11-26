@@ -10,6 +10,7 @@ import { ParseIntPipe, UseGuards, UsePipes } from '@nestjs/common';
 import { RoleGuard } from '../guards/role.guard';
 import { ValidationPipe } from '../pipes/validation.pipe';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { CompanyEntity } from 'src/entities/company.entity';
 
 @Resolver('User')
 export class UsersResolver {
@@ -58,5 +59,13 @@ export class UsersResolver {
   @Query(() => [ProductEntity])
   async getUsersFavoriteProducts(@Args("getUsersFavoriteProducts") userId:number):Promise<ProductEntity[]> {
     return await this.userService.getUsersFavoriteProducts(userId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Query(() => [CompanyEntity])
+  async getUsersCompanies(
+    @Args('getUsersCompanies') id: number,
+  ): Promise<CompanyEntity[]> {
+    return this.userService.getUsersCompanies(id);
   }
 }

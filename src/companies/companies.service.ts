@@ -57,20 +57,7 @@ export class CompaniesService {
   }
 
   async getById(id: number): Promise<CompanyEntity> {
-    return await this.companyRepository.findOne({where:{id:id}});
+    return await this.companyRepository.findOne({where:{id:id},relations:["image"]});
   }
 
-  async getUsersCompanies(id: number): Promise<CompanyEntity[]> {
-    const user = await this.userRepository.findOne({
-      relations: [
-          "companies",
-          "companies.image"
-      ],
-      where: {
-        id: id,
-      },
-    });
-
-    return user.companies;
-  }
 }

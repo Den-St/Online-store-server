@@ -13,6 +13,7 @@ import {Field, ID, ObjectType} from "@nestjs/graphql";
 import {RoleEntity} from "./role.entity";
 import {JoinColumn} from "typeorm";
 import {CompanyEntity} from "./company.entity";
+import { ReviewEntity } from './review.entity';
 
 @ObjectType()
 @Entity()
@@ -47,28 +48,32 @@ export class UserEntity {
     @JoinTable()
     roles:RoleEntity[];
 
-    @OneToMany(() => CompanyEntity,company => company.creator,{eager:true})
+    @OneToMany(() => CompanyEntity,company => company.creator,)
     @Field(() => [CompanyEntity])
     @JoinTable()
     companies:CompanyEntity[];
 
     @Field(() => CartEntity)
-    @OneToOne(() => CartEntity,{eager:true})
+    @OneToOne(() => CartEntity)
     @JoinColumn()
     cart:CartEntity;
 
     @Field(() => [ReceiptEntity])
-    @OneToMany(() => ReceiptEntity,(receipt) => receipt.buyer,{eager:true})
+    @OneToMany(() => ReceiptEntity,(receipt) => receipt.buyer)
     @JoinColumn()
-    receipts:ReceiptEntity[]
+    receipts:ReceiptEntity[];
 
     @Field(() => [ProductEntity])
-    @ManyToMany(() => ProductEntity,{eager:true,nullable:true})
+    @ManyToMany(() => ProductEntity,{nullable:true})
     @JoinTable()
     recentlyViewedProducts:ProductEntity[];
 
     @Field(() => [ProductEntity])
-    @ManyToMany(() => ProductEntity,{eager:true,nullable:true})
+    @ManyToMany(() => ProductEntity,{nullable:true})
     @JoinTable()
-    favoriteProducts:ProductEntity[]
+    favoriteProducts:ProductEntity[];
+
+    @Field(() => [ReviewEntity])
+    @OneToMany(() => ReviewEntity,review => review.creator,{nullable:true})
+    reviews:ReviewEntity[];
 };

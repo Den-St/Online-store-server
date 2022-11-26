@@ -32,14 +32,12 @@ export class CharacteristicEntity {
   @Column({ unique: false })
   name: string;
 
-  @ManyToMany((type) => CharacteristicValueEntity, (value) => value.id, {
-    eager: true,
-  })
+  @ManyToMany(() => CharacteristicValueEntity, (value) => value.id)
   @Field(() => [CharacteristicValueEntity])
   @JoinTable()
   values: CharacteristicValueEntity[];
 
-  @ManyToOne(() => CharacteristicValueEntity,{eager:true})
+  @ManyToOne(() => CharacteristicValueEntity)
   @Field(() => CharacteristicValueEntity)
   @JoinTable()
   value: CharacteristicValueEntity;

@@ -16,7 +16,7 @@ export class CartEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => CartItemEntity,(cartItem) => cartItem.cart,{eager:true,nullable:true})
+  @OneToMany(() => CartItemEntity,(cartItem) => cartItem.cart,{nullable:true})
   @Field(() => [CartItemEntity],{nullable:true})
   @JoinTable()
   cartItems:CartItemEntity[];

@@ -10,7 +10,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CharacteristicEntity } from './characteristic.entity';
 
 @ObjectType()
 @Entity()

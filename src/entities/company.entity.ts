@@ -32,12 +32,12 @@ export class CompanyEntity{
     name:string;
 
     @Field(() => UserEntity)
-    @ManyToOne(() => UserEntity,creator => creator.companies)
+    @ManyToOne(() => UserEntity,creator => creator)
     @JoinTable()
     creator:UserEntity;
 
     @Field(() => ImageEntity)
-    @OneToOne(() => ImageEntity,{eager:true})
+    @OneToOne(() => ImageEntity)
     @JoinColumn()
     image:ImageEntity;
 }

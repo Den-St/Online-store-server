@@ -26,7 +26,7 @@ export class CartResolver {
         return await this.cartService.getProductIdsByUserId(id);
     }
 
-    @Mutation(() => CartEntity)
+    @Mutation(() => CartEntity,{nullable:true})
     async deleteProductFromCart(@Args("deleteProductFromCart") dto:DeleteProductFromCartDto):Promise<CartEntity> {
         return await this.cartService.deleteProduct(dto);
     }

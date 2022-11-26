@@ -9,8 +9,12 @@ export class CartItemsService {
     constructor(@InjectRepository(CartItemEntity) public readonly cartItemRepository:Repository<CartItemEntity>){}
 
     async createAndSave(dto:{product:ProductEntity,number:number}) {
-        const newCartItem =  this.cartItemRepository.create({product:dto.product,number:dto.number});
+        const newCartItem = this.cartItemRepository.create({product:dto.product,number:dto.number});
         await this.cartItemRepository.save(newCartItem);
+        return newCartItem;
+    }
+    async changeNumber(dto:{cartItem:CartItemEntity,number:number}) {
+        const newCartItem = await this.cartItemRepository.save({...dto.cartItem,number:dto.number});
         return newCartItem;
     }
     async deleteByProduct(product:ProductEntity) {
